@@ -17,12 +17,12 @@ export default function LoginPage() {
     try {
       const res: any = await userApi.login(values)
       if (res.code !== 200) {
-        message.error(res.msg || 'Login failed')
+        message.error(res.msg || '登录失败')
         return
       }
       const data = res.data
       if (!data || !data.token) {
-        message.error('Login failed: invalid response')
+        message.error('登录失败：响应异常')
         return
       }
       setToken(data.token)
@@ -35,10 +35,10 @@ export default function LoginPage() {
         realName: data.realName,
         role: data.role,
       })
-      message.success('Login success')
+      message.success('登录成功')
       navigate('/')
     } catch (err: any) {
-      message.error(err?.response?.data?.msg || err?.message || 'Network error')
+      message.error(err?.response?.data?.msg || err?.message || '网络错误')
     } finally {
       setLoading(false)
     }
@@ -51,25 +51,25 @@ export default function LoginPage() {
     }}>
       <Card style={{ width: '100%', maxWidth: 400, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <Title level={3} style={{ textAlign: 'center', marginBottom: 24, fontSize: 'clamp(20px, 5vw, 28px)' }}>
-          Campus Trade
+          校园闲置交易平台
         </Title>
         <Form onFinish={onFinish} size="large">
           <Form.Item name="phone" rules={[
-            { required: true, message: 'Please enter phone' },
-            { pattern: /^1[3-9]\d{9}$/, message: 'Invalid phone' },
+            { required: true, message: '请输入手机号' },
+            { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' },
           ]}>
-            <Input prefix={<PhoneOutlined />} placeholder="Phone" />
+            <Input prefix={<PhoneOutlined />} placeholder="手机号" />
           </Form.Item>
-          <Form.Item name="password" rules={[{ required: true, message: 'Please enter password' }]}>
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+          <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
+            <Input.Password prefix={<LockOutlined />} placeholder="密码" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>Login</Button>
+            <Button type="primary" htmlType="submit" loading={loading} block>登录</Button>
           </Form.Item>
         </Form>
         <div style={{ textAlign: 'center' }}>
-          <Text>No account? </Text>
-          <Link to="/register">Register</Link>
+          <Text>还没有账号？</Text>
+          <Link to="/register"> 去注册</Link>
         </div>
       </Card>
     </div>

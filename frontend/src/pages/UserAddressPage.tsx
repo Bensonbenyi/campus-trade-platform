@@ -43,10 +43,10 @@ export default function UserAddressPage() {
       setSaving(true)
       if (editingAddress?.id) {
         await userApi.updateAddress(editingAddress.id, values)
-        message.success('Updated')
+        message.success('修改成功')
       } else {
         await userApi.addAddress(values)
-        message.success('Added')
+        message.success('添加成功')
       }
       setModalOpen(false)
       loadAddresses()
@@ -55,48 +55,35 @@ export default function UserAddressPage() {
 
   const handleDelete = async (id: number) => {
     await userApi.deleteAddress(id)
-    message.success('Deleted')
+    message.success('删除成功')
     loadAddresses()
   }
 
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><Spin size="large" /></div>
 
   return (
-    <div style={{
-      maxWidth: 700,
-      width: '100%',
-      margin: 'clamp(16px, 4vw, 40px) auto',
-      padding: '0 16px',
-      boxSizing: 'border-box',
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-        flexWrap: 'wrap',
-        gap: 8,
-      }}>
-        <Title level={4} style={{ margin: 0, fontSize: 'clamp(18px, 4vw, 24px)' }}>Shipping Address</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>Add</Button>
+    <div style={{ maxWidth: 700, width: '100%', margin: 'clamp(16px, 4vw, 40px) auto', padding: '0 16px', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+        <Title level={4} style={{ margin: 0, fontSize: 'clamp(18px, 4vw, 24px)' }}>收货地址</Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>新增地址</Button>
       </div>
 
       {addresses.length === 0 ? (
-        <Empty description="No addresses yet" />
+        <Empty description="暂无收货地址" />
       ) : (
         addresses.map((addr) => (
           <Card
             key={addr.id}
             style={{ marginBottom: 12 }}
-            extra={addr.isDefault && <Tag color="blue">Default</Tag>}
+            extra={addr.isDefault && <Tag color="blue">默认</Tag>}
             actions={[
               <EditOutlined key="edit" onClick={() => openEdit(addr)} />,
               <Popconfirm
                 key="delete"
-                title="Delete this address?"
+                title="确定删除该地址吗？"
                 onConfirm={() => handleDelete(addr.id!)}
-                okText="OK"
-                cancelText="Cancel"
+                okText="确定"
+                cancelText="取消"
               >
                 <DeleteOutlined style={{ color: '#ff4d4f' }} />
               </Popconfirm>,
@@ -113,7 +100,7 @@ export default function UserAddressPage() {
       )}
 
       <Modal
-        title={editingAddress ? 'Edit Address' : 'Add Address'}
+        title={editingAddress ? '编辑地址' : '新增地址'}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => setModalOpen(false)}
@@ -122,25 +109,25 @@ export default function UserAddressPage() {
         width="min(520px, 95vw)"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="contactName" label="Contact Name" rules={[{ required: true, message: 'Required' }]}>
-            <Input placeholder="Contact name" />
+          <Form.Item name="contactName" label="联系人" rules={[{ required: true, message: '请输入联系人' }]}>
+            <Input placeholder="联系人姓名" />
           </Form.Item>
-          <Form.Item name="contactPhone" label="Phone" rules={[
-            { required: true, message: 'Required' },
-            { pattern: /^1[3-9]\d{9}$/, message: 'Invalid phone' }
+          <Form.Item name="contactPhone" label="联系电话" rules={[
+            { required: true, message: '请输入联系电话' },
+            { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' },
           ]}>
-            <Input placeholder="Phone number" />
+            <Input placeholder="联系电话" />
           </Form.Item>
-          <Form.Item name="campus" label="Campus" rules={[{ required: true, message: 'Required' }]}>
-            <Input placeholder="e.g. Xianlin Campus" />
+          <Form.Item name="campus" label="校区" rules={[{ required: true, message: '请输入校区' }]}>
+            <Input placeholder="如：仙林校区" />
           </Form.Item>
-          <Form.Item name="building" label="Building" rules={[{ required: true, message: 'Required' }]}>
-            <Input placeholder="e.g. Building 1" />
+          <Form.Item name="building" label="楼栋" rules={[{ required: true, message: '请输入楼栋' }]}>
+            <Input placeholder="如：1号楼" />
           </Form.Item>
-          <Form.Item name="room" label="Room" rules={[{ required: true, message: 'Required' }]}>
-            <Input placeholder="e.g. 301" />
+          <Form.Item name="room" label="宿舍号" rules={[{ required: true, message: '请输入宿舍号' }]}>
+            <Input placeholder="如：301" />
           </Form.Item>
-          <Form.Item name="isDefault" label="Set as default" valuePropName="checked">
+          <Form.Item name="isDefault" label="设为默认地址" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>

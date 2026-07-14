@@ -48,4 +48,10 @@ export const userApi = {
 
   deleteAddress: (id: number) =>
     request.delete('/api/user/address/' + id),
+
+  checkPhone: (phone: string) =>
+    request.get('/api/user/check-phone', { params: { phone } }),
+
+  checkStudentId: (studentId: string) =>
+    request.get('/api/user/check-student-id', { params: { studentId } }),
 }

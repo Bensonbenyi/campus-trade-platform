@@ -98,4 +98,14 @@ public class UserController {
             throw new BusinessException(401, "token无效或已过期");
         }
     }
+    @Operation(summary = "检查手机号是否已注册")
+    @GetMapping("/check-phone")
+    public Result<Boolean> checkPhone(@RequestParam String phone) {
+        return Result.success(userService.isPhoneRegistered(phone));
+    }
+    @Operation(summary = "检查学号是否已注册")
+    @GetMapping("/check-student-id")
+    public Result<Boolean> checkStudentId(@RequestParam String studentId) {
+        return Result.success(userService.isStudentIdRegistered(studentId));
+    }
 }

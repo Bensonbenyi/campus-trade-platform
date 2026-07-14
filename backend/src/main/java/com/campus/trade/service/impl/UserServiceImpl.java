@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void sendCode(String phone) {
         if (phone == null || phone.isBlank()) {
-            throw new BusinessException("Phone number is required");
+            throw new BusinessException("手机号不能为空");
         }
     }
 
@@ -44,20 +44,20 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserVO register(UserRegisterDTO dto) {
         if (dto.getCode() == null || !dto.getCode().trim().equals(MVP_CODE)) {
-            throw new BusinessException("Wrong verification code, please use: " + MVP_CODE);
+            throw new BusinessException("验证码错误，请使用：" + MVP_CODE);
         }
         Long phoneCount = userMapper.selectCount(
                 new LambdaQueryWrapper<User>().eq(User::getPhone, dto.getPhone()));
         if (phoneCount > 0) {
-            throw new BusinessException("Phone already registered");
+            throw new BusinessException("该手机号已注册");
         }
         if (!RegexUtils.isValidStudentId(dto.getStudentId())) {
-            throw new BusinessException("Invalid student ID format");
+            throw new BusinessException("学号格式不正确");
         }
         Long studentCount = userMapper.selectCount(
                 new LambdaQueryWrapper<User>().eq(User::getStudentId, dto.getStudentId()));
         if (studentCount > 0) {
-            throw new BusinessException("Student ID already registered");
+            throw new BusinessException("该学号已注册");
         }
         User user = new User();
         user.setPhone(dto.getPhone());
@@ -94,13 +94,13 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectOne(
                 new LambdaQueryWrapper<User>().eq(User::getPhone, dto.getPhone()));
         if (user == null) {
-            throw new BusinessException("Phone not registered");
+            throw new BusinessException("手机号未注册");
         }
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new BusinessException("Wrong password");
+            throw new BusinessException("密码错误");
         }
         if (user.getStatus() != null && user.getStatus() == 1) {
-            throw new BusinessException("Account is banned");
+            throw new BusinessException("账号已被禁用");
         }
         String token = jwtUtils.generateToken(user.getId(), user.getPhone());
         UserVO vo = new UserVO();
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
     public UserVO getUserInfo(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
-            throw new BusinessException("User not found");
+            throw new BusinessException("用户不存在");
         }
         UserVO vo = new UserVO();
         vo.setId(user.getId());
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
     public UserVO updateUserInfo(Long userId, UserUpdateDTO dto) {
         User user = userMapper.selectById(userId);
         if (user == null) {
-            throw new BusinessException("User not found");
+            throw new BusinessException("用户不存在");
         }
         if (dto.getNickname() != null && !dto.getNickname().isBlank()) {
             user.setNickname(dto.getNickname());
@@ -192,7 +192,7 @@ public class UserServiceImpl implements UserService {
                         .eq(UserAddress::getId, addressId)
                         .eq(UserAddress::getUserId, userId));
         if (address == null) {
-            throw new BusinessException("Address not found");
+            throw new BusinessException("地址不存在");
         }
         if (Boolean.TRUE.equals(dto.getIsDefault())) {
             clearDefaultAddress(userId);
@@ -214,7 +214,7 @@ public class UserServiceImpl implements UserService {
                         .eq(UserAddress::getId, addressId)
                         .eq(UserAddress::getUserId, userId));
         if (address == null) {
-            throw new BusinessException("Address not found");
+            throw new BusinessException("地址不存在");
         }
         userAddressMapper.deleteById(addressId);
     }
@@ -238,5 +238,15 @@ public class UserServiceImpl implements UserService {
         dto.setRoom(address.getRoom());
         dto.setIsDefault(address.getIsDefault());
         return dto;
+    }
+    @Override
+    public boolean isPhoneRegistered(String phone) {
+        return userMapper.selectCount(
+                new LambdaQueryWrapper<User>().eq(User::getPhone, phone)) > 0;
+    }
+    @Override
+    public boolean isStudentIdRegistered(String studentId) {
+        return userMapper.selectCount(
+                new LambdaQueryWrapper<User>().eq(User::getStudentId, studentId)) > 0;
     }
 }

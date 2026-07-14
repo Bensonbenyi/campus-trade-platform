@@ -7,9 +7,9 @@ import { userApi } from '../api/user'
 const { Title, Text } = Typography
 
 const stepItems = [
-  { title: 'Verify' },
-  { title: 'Info' },
-  { title: 'Done' },
+  { title: '验证手机' },
+  { title: '填写信息' },
+  { title: '注册成功' },
 ]
 
 export default function RegisterPage() {
@@ -25,7 +25,7 @@ export default function RegisterPage() {
       await form.validateFields(['phone'])
       const phone = form.getFieldValue('phone')
       await userApi.sendCode(phone)
-      message.success('Code sent (MVP: 888888)')
+      message.success('验证码已发送（固定888888）')
       setCountdown(60)
       const timer = setInterval(() => {
         setCountdown((prev) => {
@@ -40,15 +40,23 @@ export default function RegisterPage() {
     try {
       if (current === 0) {
         await form.validateFields(['phone', 'code'])
-        setStep1Data({
-          phone: form.getFieldValue('phone'),
-          code: form.getFieldValue('code'),
-        })
+        const phone = form.getFieldValue('phone')
+        const res: any = await userApi.checkPhone(phone)
+        if (res.data === true) {
+          message.error('该手机号已注册')
+          return
+        }
+        setStep1Data({ phone, code: form.getFieldValue('code') })
         setCurrent(1)
       } else if (current === 1) {
         await form.validateFields(['studentId', 'realName', 'password', 'confirmPassword'])
         setLoading(true)
         const values = form.getFieldsValue()
+        const checkRes: any = await userApi.checkStudentId(values.studentId)
+        if (checkRes.data === true) {
+          message.error('该学号已注册')
+          return
+        }
         await userApi.register({
           phone: step1Data.phone,
           code: step1Data.code,
@@ -73,26 +81,26 @@ export default function RegisterPage() {
     }}>
       <Card style={{ width: '100%', maxWidth: 480, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <Title level={3} style={{ textAlign: 'center', marginBottom: 24, fontSize: 'clamp(20px, 5vw, 28px)' }}>
-          Register
+          注册账号
         </Title>
         <Steps current={current} items={stepItems} style={{ marginBottom: 32 }} />
         <Form form={form} size="large">
           {current === 0 && (
             <>
               <Form.Item name="phone" rules={[
-                { required: true, message: 'Please enter phone' },
-                { pattern: /^1[3-9]\d{9}$/, message: 'Invalid phone' },
+                { required: true, message: '请输入手机号' },
+                { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' },
               ]}>
-                <Input prefix={<PhoneOutlined />} placeholder="Phone" />
+                <Input prefix={<PhoneOutlined />} placeholder="手机号" />
               </Form.Item>
-              <Form.Item name="code" rules={[{ required: true, message: 'Please enter code' }]}>
+              <Form.Item name="code" rules={[{ required: true, message: '请输入验证码' }]}>
                 <Input
                   prefix={<SafetyOutlined />}
-                  placeholder="Verification code"
+                  placeholder="验证码"
                   suffix={
                     <Button type="link" onClick={sendCode} disabled={countdown > 0}
                       style={{ padding: 0, whiteSpace: 'nowrap' }}>
-                      {countdown > 0 ? `${countdown}s` : 'Get code'}
+                      {countdown > 0 ? `${countdown}s` : '获取验证码'}
                     </Button>
                   }
                 />
@@ -102,62 +110,62 @@ export default function RegisterPage() {
           {current === 1 && (
             <>
               <Form.Item name="studentId" rules={[
-                { required: true, message: 'Please enter student ID' },
-                { pattern: /^20\d{2}10\d{4}$/, message: 'Invalid format' },
+                { required: true, message: '请输入学号' },
+                { pattern: /^\d{14}$/, message: '学号格式不正确' },
               ]}>
-                <Input prefix={<IdcardOutlined />} placeholder="Student ID" />
+                <Input prefix={<IdcardOutlined />} placeholder="学号" />
               </Form.Item>
-              <Form.Item name="realName" rules={[{ required: true, message: 'Please enter name' }]}>
-                <Input prefix={<UserOutlined />} placeholder="Real name" />
+              <Form.Item name="realName" rules={[{ required: true, message: '请输入真实姓名' }]}>
+                <Input prefix={<UserOutlined />} placeholder="真实姓名" />
               </Form.Item>
               <Form.Item name="password" rules={[
-                { required: true, message: 'Please enter password' },
-                { min: 6, message: 'At least 6 characters' },
+                { required: true, message: '请输入密码' },
+                { min: 6, message: '密码至少6位' },
               ]}>
-                <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                <Input.Password prefix={<LockOutlined />} placeholder="密码" />
               </Form.Item>
               <Form.Item name="confirmPassword" dependencies={['password']}
                 rules={[
-                  { required: true, message: 'Please confirm password' },
+                  { required: true, message: '请确认密码' },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
                       if (!value || getFieldValue('password') === value) return Promise.resolve()
-                      return Promise.reject(new Error('Passwords do not match'))
+                      return Promise.reject(new Error('两次密码不一致'))
                     },
                   }),
                 ]}>
-                <Input.Password prefix={<LockOutlined />} placeholder="Confirm password" />
+                <Input.Password prefix={<LockOutlined />} placeholder="确认密码" />
               </Form.Item>
             </>
           )}
           {current === 2 && (
             <div style={{ textAlign: 'center', padding: 'clamp(20px, 5vw, 40px)' }}>
               <Title level={4} style={{ color: '#52c41a', fontSize: 'clamp(18px, 4vw, 24px)' }}>
-                Registration success!
+                注册成功！
               </Title>
-              <Text>Welcome to Campus Trade</Text>
+              <Text>欢迎加入校园闲置交易平台</Text>
               <br /><br />
               <Button type="primary" size="large" onClick={() => navigate('/login')} block>
-                Go to Login
+                去登录
               </Button>
             </div>
           )}
         </Form>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, gap: 8 }}>
           {current > 0 && current < 2 && (
-            <Button onClick={() => setCurrent(current - 1)}>Previous</Button>
+            <Button onClick={() => setCurrent(current - 1)}>上一步</Button>
           )}
           <div style={{ flex: 1 }} />
           {current < 2 && (
             <Button type="primary" onClick={handleNext} loading={loading}>
-              {current === 1 ? 'Submit' : 'Next'}
+              {current === 1 ? '提交注册' : '下一步'}
             </Button>
           )}
         </div>
         {current === 0 && (
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Text>Already have an account? </Text>
-            <Link to="/login">Login</Link>
+            <Text>已有账号？</Text>
+            <Link to="/login"> 去登录</Link>
           </div>
         )}
       </Card>

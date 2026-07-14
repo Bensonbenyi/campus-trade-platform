@@ -23,4 +23,6 @@ public interface UserService {
     AddressDTO updateAddress(Long userId, Long addressId, AddressDTO dto);
 
     void deleteAddress(Long userId, Long addressId);
+    boolean isPhoneRegistered(String phone);
+    boolean isStudentIdRegistered(String studentId);
 }
