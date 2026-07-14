@@ -2,8 +2,12 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/campus_trade
     username: postgres
-    password: your_password_here
+    password: Fzh050829
     driver-class-name: org.postgresql.Driver
+
+jwt:
+  secret: campus-trade-jwt-secret-key-2024
+  expiration: 86400000
 
 mybatis-plus:
   configuration:

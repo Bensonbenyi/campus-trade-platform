@@ -1,15 +1,33 @@
 import { create } from 'zustand'
 
 interface UserInfo {
-  token: string
-  username: string
-  setToken: (val:string)=>void
-  setName: (val:string)=>void
+  id: number
+  phone: string
+  nickname: string
+  avatar: string
+  studentId: string
+  realName: string
+  role: string
 }
 
-export const useUserStore = create<UserInfo>((set) => ({
-  token: '',
-  username: '',
-  setToken: (val) => set({token:val}),
-  setName: (val) => set({username:val})
+interface UserStore {
+  token: string
+  user: UserInfo | null
+  setToken: (val: string) => void
+  setUser: (user: UserInfo) => void
+  logout: () => void
+}
+
+export const useUserStore = create<UserStore>((set) => ({
+  token: localStorage.getItem('token') || '',
+  user: null,
+  setToken: (val) => {
+    localStorage.setItem('token', val)
+    set({ token: val })
+  },
+  setUser: (user) => set({ user }),
+  logout: () => {
+    localStorage.removeItem('token')
+    set({ token: '', user: null })
+  },
 }))
