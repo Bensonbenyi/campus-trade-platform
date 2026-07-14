@@ -57,6 +57,15 @@ createdb campus_trade
 ./mvnw spring-boot:run
 ```
 
+首次运行前请执行数据库脚本：
+
+```bash
+psql -U postgres -d campus_trade -f src/main/resources/db/schema.sql
+psql -U postgres -d campus_trade -f src/main/resources/db/data.sql
+```
+
+后端公共契约、JWT 格式和实体映射说明见 [后端开发规范](design_docs/BackendDevRule.md)。
+
 启动成功后访问 API 文档：http://localhost:8080/doc.html
 
 ### 前端
